@@ -34,30 +34,35 @@ func (this *AccountService) CreateAccount(ctx context.Context, account *Account)
 	return nil
 }
 
-func (this *AccountService) Login(ctx context.Context, username string, password string) (string, string, error) {
+func (this *AccountService) Login(ctx context.Context, username string, password string) (*LoginResponse, error) {
 	account, err := this.repo.FindByUsername(ctx, username)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(account.Passwd), []byte(password)); err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	token, err := auth.GenerateToken(account.ID, username)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 	refreshToken, err := auth.GenerateRefreshToken()
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	if err := this.repo.Login(ctx, account.ID, token, refreshToken); err != nil {
-		return "", "", err
+		return nil, err
 	}
 
-	return token, refreshToken, nil
+	return &LoginResponse{
+		Token:        token,
+		RefreshToken: refreshToken,
+		AccountID:    account.ID,
+		Username:     account.Username,
+	}, nil
 }
 
 func (this *AccountService) RefreshAccessToken(ctx context.Context, refreshToken string) (string, uint, string, error) {

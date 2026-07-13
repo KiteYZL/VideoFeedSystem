@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"demo/internal/errorstatus"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,24 +41,13 @@ func (this *AccountHandler) Login(c *gin.Context) {
 		return
 	}
 
-	account, err := this.accountService.FindByUsername(c.Request.Context(), req.Username)
+	loginResponse, err := this.accountService.Login(c.Request.Context(), req.Username, req.Passwd)
 	if err != nil {
 		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	token, refreshToken, err := this.accountService.Login(c.Request.Context(), req.Username, req.Passwd)
-	if err != nil {
-		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, LoginResponse{
-		Token:        token,
-		RefreshToken: refreshToken,
-		AccountID:    account.ID,
-		Username:     account.Username,
-	})
+	c.JSON(200, loginResponse)
 }
 
 func (this *AccountHandler) Refresh(c *gin.Context) {
