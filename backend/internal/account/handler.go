@@ -2,8 +2,8 @@ package account
 
 import (
 	"errors"
-	"net/http"
 
+	"demo/internal/errorstatus"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,7 @@ func NewAccountHandler(accountService *AccountService) *AccountHandler {
 func (this *AccountHandler) CreateAccount(c *gin.Context) {
 	var req CreateAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
@@ -26,33 +26,33 @@ func (this *AccountHandler) CreateAccount(c *gin.Context) {
 		Username: req.Username,
 		Passwd:   req.Passwd,
 	}); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "注册失败，请稍后重试"})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "account is successfully created"})
+	c.JSON(200, gin.H{"message": "account is successfully created"})
 }
 
 func (this *AccountHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
 	account, err := this.accountService.FindByUsername(c.Request.Context(), req.Username)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
 	token, refreshToken, err := this.accountService.Login(c.Request.Context(), req.Username, req.Passwd)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{
+	c.JSON(200, LoginResponse{
 		Token:        token,
 		RefreshToken: refreshToken,
 		AccountID:    account.ID,
@@ -63,17 +63,17 @@ func (this *AccountHandler) Login(c *gin.Context) {
 func (this *AccountHandler) Refresh(c *gin.Context) {
 	var req RefreshRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
 	token, accountID, username, err := this.accountService.RefreshAccessToken(c.Request.Context(), req.RefreshToken)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{
+	c.JSON(200, LoginResponse{
 		Token:     token,
 		AccountID: accountID,
 		Username:  username,
@@ -83,32 +83,32 @@ func (this *AccountHandler) Refresh(c *gin.Context) {
 func (this *AccountHandler) Logout(c *gin.Context) {
 	accountID, err := getAccountID(c)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := this.accountService.Logout(c.Request.Context(), accountID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "logout successfully"})
+	c.JSON(200, gin.H{"message": "logout successfully"})
 }
 
 func (this *AccountHandler) FindByID(c *gin.Context) {
 	var req FindByIDRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
 	account, err := this.accountService.FindByID(c.Request.Context(), req.ID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{
+	c.JSON(200, LoginResponse{
 		Token:        account.Token,
 		RefreshToken: account.RefreshToken,
 		AccountID:    req.ID,
@@ -119,17 +119,17 @@ func (this *AccountHandler) FindByID(c *gin.Context) {
 func (this *AccountHandler) FindByUsername(c *gin.Context) {
 	var req FindByUsernameRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
 	account, err := this.accountService.FindByUsername(c.Request.Context(), req.Username)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(errorstatus.ErrorToStatus(err), gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{
+	c.JSON(200, LoginResponse{
 		Token:        account.Token,
 		RefreshToken: account.RefreshToken,
 		AccountID:    account.ID,

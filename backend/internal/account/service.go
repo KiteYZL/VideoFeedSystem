@@ -3,7 +3,7 @@ package account
 import (
 	"context"
 	"demo/internal/auth"
-	"errors"
+	"demo/internal/errorstatus"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,7 +19,7 @@ func NewAccountService(repo *AccountRepository) *AccountService {
 // bcrypt哈希加密密码并写入数据库
 func (this *AccountService) CreateAccount(ctx context.Context, account *Account) error {
 	if account.Passwd == "" {
-		return errors.New("password can't be empty!")
+		return errorstatus.ErrPasswordEmpty
 	}
 
 	hashedPasswd, err := bcrypt.GenerateFromPassword([]byte(account.Passwd), bcrypt.DefaultCost)
