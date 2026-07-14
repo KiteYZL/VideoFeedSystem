@@ -98,12 +98,7 @@ func (this *AccountHandler) FindByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, LoginResponse{
-		Token:        account.Token,
-		RefreshToken: account.RefreshToken,
-		AccountID:    req.ID,
-		Username:     account.Username,
-	})
+	c.JSON(200, account)
 }
 
 func (this *AccountHandler) FindByUsername(c *gin.Context) {
@@ -119,12 +114,7 @@ func (this *AccountHandler) FindByUsername(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, LoginResponse{
-		Token:        account.Token,
-		RefreshToken: account.RefreshToken,
-		AccountID:    account.ID,
-		Username:     req.Username,
-	})
+	c.JSON(200, account)
 }
 
 func getAccountID(c *gin.Context) (uint, error) {
