@@ -31,7 +31,7 @@ func SetRouter(db *gorm.DB) *gin.Engine {
 		accountGroup.POST("/login", accountHandler.Login)
 		accountGroup.POST("/refresh", accountHandler.Refresh)
 		accountGroup.POST("/findByID", accountHandler.FindByID)
-		accountGroup.POST("/finByUsername", accountHandler.FindByUsername)
+		accountGroup.POST("/findByUsername", accountHandler.FindByUsername)
 	}
 
 	// 受保护的 account 路由

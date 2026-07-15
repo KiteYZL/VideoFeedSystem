@@ -57,7 +57,7 @@ func EnvOverrides(cfg *Config) {
 	}
 
 	if v := os.Getenv("SERVER_PORT"); v != "" {
-		if port, err := strconv.Atoi(v); err != nil {
+		if port, err := strconv.Atoi(v); err == nil {
 			cfg.Server.Port = port
 		}
 	}
@@ -67,7 +67,7 @@ func EnvOverrides(cfg *Config) {
 	}
 
 	if v := os.Getenv("MYSQL_PORT"); v != "" {
-		if port, err := strconv.Atoi(v); err != nil {
+		if port, err := strconv.Atoi(v); err == nil {
 			cfg.DB.Port = port
 		}
 	}
@@ -88,7 +88,7 @@ func EnvOverrides(cfg *Config) {
 // 找不到配置文件时返回默认配置
 func LoadLocalDev(filename string) (Config, bool, error) {
 	cfg, err := Load(filename)
-	if err != nil {
+	if err == nil {
 		return cfg, false, nil
 	}
 	if errors.Is(err, os.ErrNotExist) {
