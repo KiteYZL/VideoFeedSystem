@@ -45,7 +45,7 @@ func main() {
 
 	// 装配路由并启动服务
 	r := apphttp.SetRouter(sqlDB)
-	log.Println("server is running on port %d", cfg.Server.Port)
+	log.Printf("server is running on port %d", cfg.Server.Port)
 	if err := r.Run(":" + strconv.Itoa(cfg.Server.Port)); err != nil {
 		log.Fatalf("fail to run server: %v", err)
 	}
