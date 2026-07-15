@@ -2,7 +2,7 @@ package http
 
 import (
 	"demo/internal/account"
-	"demo/internal/middleware/jwt"
+	appjwt "demo/internal/middleware/jwt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +36,7 @@ func SetRouter(db *gorm.DB) *gin.Engine {
 
 	// 受保护的 account 路由
 	protectAccountGroup := accountGroup.Group("")
-	protectAccountGroup.Use(jwt.JWTAuth(accountRepo))
+	protectAccountGroup.Use(appjwt.JWTAuth(accountRepo))
 	{
 		protectAccountGroup.POST("logout", accountHandler.Logout)
 	}
