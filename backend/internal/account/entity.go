@@ -2,7 +2,7 @@ package account
 
 type Account struct {
 	ID           uint   `gorm:"primaryKey" json:"id"`
-	Username     string `gorm:"uniqueIndex;not null" json:"username"`
+	Username     string `gorm:"type:varchar(64);uniqueIndex;not null" json:"username"`
 	Passwd       string `json:"-"`
 	Token        string `json:"-"`
 	RefreshToken string `json:"-"`

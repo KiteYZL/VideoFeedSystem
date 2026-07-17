@@ -104,7 +104,7 @@ func DefaultLocalConfig() Config {
 			Host:     "localhost",
 			Port:     3306,
 			Username: "root",
-			Passwd:   "123456",
+			Passwd:   "mysql123456",
 			DBname:   "feedsystem",
 		},
 	}
