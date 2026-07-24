@@ -12,7 +12,9 @@ import (
 type Config struct {
 	Server ServerConfig `yaml:"server"`
 	DB     DBConfig     `yaml:"db"`
-	// Redis  RedisConfig
+	Redis  RedisConfig  `yaml:"redis"`
+	Rabbit RabbitConfig `yaml:"rabbitmq"`
+	Video  VideoConfig  `yaml:"video"`
 }
 
 type ServerConfig struct {
@@ -32,6 +34,23 @@ type RedisConfig struct {
 	Port   int    `yaml:"port"`
 	Passwd string `yaml:"passwd"`
 	DB     int    `yaml:"db"`
+}
+
+type RabbitConfig struct {
+	URL         string `yaml:"url"`
+	Exchange    string `yaml:"exchange"`
+	Queue       string `yaml:"queue"`
+	ConsumerTag string `yaml:"consumer_tag"`
+	RetryLimit  int    `yaml:"retry_limit"`
+}
+
+type VideoConfig struct {
+	LocalCacheCapacity    int `yaml:"local_cache_capacity"`
+	LocalCacheTTLSeconds  int `yaml:"local_cache_ttl_seconds"`
+	RedisCacheTTLSeconds  int `yaml:"redis_cache_ttl_seconds"`
+	HotWindowMinutes      int `yaml:"hot_window_minutes"`
+	HotSnapshotTTLSeconds int `yaml:"hot_snapshot_ttl_seconds"`
+	FeedPageSize          int `yaml:"feed_page_size"`
 }
 
 // 从 yaml 文件加载配置，最后应用环境变量覆盖
@@ -83,6 +102,26 @@ func EnvOverrides(cfg *Config) {
 	if v := os.Getenv("MYSQL_DB"); v != "" {
 		cfg.DB.DBname = v
 	}
+
+	if v := os.Getenv("REDIS_HOST"); v != "" {
+		cfg.Redis.Host = v
+	}
+	if v := os.Getenv("REDIS_PORT"); v != "" {
+		if port, err := strconv.Atoi(v); err == nil {
+			cfg.Redis.Port = port
+		}
+	}
+	if v := os.Getenv("REDIS_PASSWORD"); v != "" {
+		cfg.Redis.Passwd = v
+	}
+	if v := os.Getenv("REDIS_DB"); v != "" {
+		if db, err := strconv.Atoi(v); err == nil {
+			cfg.Redis.DB = db
+		}
+	}
+	if v := os.Getenv("RABBITMQ_URL"); v != "" {
+		cfg.Rabbit.URL = v
+	}
 }
 
 // 找不到配置文件时返回默认配置
@@ -107,6 +146,11 @@ func DefaultLocalConfig() Config {
 			Passwd:   "mysql123456",
 			DBname:   "feedsystem",
 		},
+		Redis: RedisConfig{Host: "localhost", Port: 6379},
+		Rabbit: RabbitConfig{
+			URL: "amqp://guest:guest@localhost:5672/", Exchange: "video.events", Queue: "video.projection", ConsumerTag: "video-projection", RetryLimit: 5,
+		},
+		Video: VideoConfig{LocalCacheCapacity: 1024, LocalCacheTTLSeconds: 60, RedisCacheTTLSeconds: 300, HotWindowMinutes: 60, HotSnapshotTTLSeconds: 60, FeedPageSize: 10},
 	}
 	return cfg
 }

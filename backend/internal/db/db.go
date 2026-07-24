@@ -3,6 +3,7 @@ package db
 import (
 	"demo/internal/account"
 	"demo/internal/config"
+	"demo/internal/video"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -26,7 +27,7 @@ func NewDB(cfg config.DBConfig) (*gorm.DB, error) {
 
 // 自动建表并迁移账号表
 func AutoMigrate(db *gorm.DB) error {
-	return db.AutoMigrate(&account.Account{})
+	return db.AutoMigrate(&account.Account{}, &video.Video{}, &video.Like{}, &video.ViewDedup{}, &video.OutboxEvent{}, &video.InboxEvent{})
 }
 
 // 关闭数据库连接

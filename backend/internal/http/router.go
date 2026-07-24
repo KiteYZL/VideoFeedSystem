@@ -3,6 +3,7 @@ package http
 import (
 	"demo/internal/account"
 	appjwt "demo/internal/middleware/jwt"
+	"demo/internal/video"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 )
 
 // 创建 Gin 引擎并注册 account 路由
-func SetRouter(db *gorm.DB) *gin.Engine {
+func SetRouter(db *gorm.DB, videoService *video.Service) *gin.Engine {
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
 		log.Printf("SetTrustedProxies failed: %v", err)
@@ -39,6 +40,27 @@ func SetRouter(db *gorm.DB) *gin.Engine {
 	protectAccountGroup.Use(appjwt.JWTAuth(accountRepo))
 	{
 		protectAccountGroup.POST("logout", accountHandler.Logout)
+	}
+
+	videoHandler := video.NewHandler(videoService)
+	videoGroup := r.Group("/video")
+	{
+		videoGroup.POST("/feed", videoHandler.Feed)
+		videoGroup.POST("/detail", videoHandler.Detail)
+	}
+	protectedVideoGroup := videoGroup.Group("")
+	protectedVideoGroup.Use(appjwt.JWTAuth(accountRepo))
+	{
+		protectedVideoGroup.POST("/create", videoHandler.Create)
+		protectedVideoGroup.POST("/publish", videoHandler.Publish)
+		protectedVideoGroup.POST("/update", videoHandler.Update)
+		protectedVideoGroup.POST("/hide", videoHandler.Hide)
+		protectedVideoGroup.POST("/republish", videoHandler.Republish)
+		protectedVideoGroup.POST("/delete", videoHandler.Delete)
+		protectedVideoGroup.POST("/view", videoHandler.View)
+		protectedVideoGroup.POST("/like/create", videoHandler.Like)
+		protectedVideoGroup.POST("/like/delete", videoHandler.Unlike)
+		protectedVideoGroup.POST("/like/status", videoHandler.LikeStatus)
 	}
 
 	return r
